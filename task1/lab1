@@ -1,0 +1,59 @@
+#!/bin/bash
+
+function print_size() {
+	for item in `ls ${entry} -sh`
+	do
+		echo "${item}">&5
+		break	
+	done
+}
+
+function check_owner() {
+	local i=1
+	for item in `ls -l ${entry}`
+	do
+		if [ $i -eq 3 ]
+		then
+			echo $item
+			break
+		fi
+		i=$(( $i + 1 ))
+	done
+}
+
+function look_through() {
+	for entry in $(ls)
+	do
+		if [ -f $entry ]
+		then
+			is_owner=$(check_owner)
+			if [ "$is_owner" = $true_owner ]
+			then
+				route=`pwd`
+				echo -n "${route}/${entry}; ${entry}; ">&5
+				print_size
+			fi
+
+			file_amount=$(($file_amount + 1))
+		elif [ -d $entry ]
+		then
+			cd $entry
+			look_through 
+		fi
+	done
+	cd ..
+}
+
+if [ $# = 3 ]
+then
+	result=$3
+	touch $result
+	exec 5>$result
+
+	true_owner=$1
+	file_amount=0
+	cd $2
+	look_through
+	echo "total file amount: $file_amount"
+
+fi
