@@ -11,6 +11,8 @@
 long total_catalogs_checked = 0;
 long total_files_checked = 0;
 
+char *script_name;
+
 char *create_new_path(char *new_path, char *current_catalog_name, char *entry) {
 	strcpy(new_path, current_catalog_name);
 	if (new_path[strlen(new_path) - 1] != '/')
@@ -65,7 +67,7 @@ void print_file_info(char *cur_catalog, char* file_name) {
 				file_info.st_size,
 				access_rights,
 				file_info.st_ino,
-				asctime(gmtime(&file_info.st_mtime)));
+				asctime(gmtime(&file_info.st_ctime)));
 	}
 }
 
@@ -88,10 +90,13 @@ void search_files(char *current_catalog_name, char *target_file) {
 			}
 		}
 	}
+	else 
+		fprintf(stderr, "%s: %s: unable to open directory\n", script_name, current_catalog_name);
 }
 
 int main(int argc, char *argv[]) {
 	char *start_catalog_name, *target_file_name;
+	script_name = argv[0];
 	start_catalog_name = argv[1];
 	target_file_name = argv[2];
 
