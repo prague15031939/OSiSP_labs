@@ -4,6 +4,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <errno.h>
+#include <locale.h>
 
 #define CURRENT_DIR ".\0"
 #define PARENT_DIR "..\0"
@@ -56,19 +58,25 @@ void form_rights(char *dest, int mode) {
 }
 
 void print_file_info(char *cur_catalog, char* file_name) {
-	char file_path[1024];
+	char *file_path = malloc(sizeof(char) * 4096);
 	create_new_path(file_path, cur_catalog, file_name);
 	struct stat file_info;
 	if (!stat(file_path, &file_info)) {
 		char access_rights[15];
+		char creation_date[100];
 		form_rights(access_rights, file_info.st_mode);
-		printf("%s; %ld; %s; %ld; %s", 
+		struct tm lt;
+		localtime_r(&file_info.st_ctime, &lt);
+		strftime(creation_date, 100, "%d %B %Y", &lt);
+		printf("%s %ld %s %ld %s\n", 
 				file_path, 
 				file_info.st_size,
 				access_rights,
 				file_info.st_ino,
-				asctime(gmtime(&file_info.st_ctime)));
+				creation_date);
 	}
+	else 
+		fprintf(stderr, "%s: %s: %s\n", script_name, file_path, strerror(errno));	
 }
 
 void search_files(char *current_catalog_name, char *target_file) {
@@ -84,17 +92,21 @@ void search_files(char *current_catalog_name, char *target_file) {
 			else if (entry->d_type == DT_DIR) {
 				if (strcmp(entry->d_name, CURRENT_DIR) != 0 && strcmp(entry->d_name, PARENT_DIR) != 0) {
 					total_catalogs_checked++;
-					char new_path[256];
+					char *new_path = malloc(sizeof(char) * 4096);
 					search_files(create_new_path(new_path, current_catalog_name, entry->d_name), target_file);
 				}
 			}
 		}
+		if (closedir(current_catalog) == -1)
+			fprintf(stderr, "%s: %s: %s\n", script_name, current_catalog_name, strerror(errno));
 	}
 	else 
-		fprintf(stderr, "%s: %s: unable to open directory\n", script_name, current_catalog_name);
+		fprintf(stderr, "%s: %s: %s\n", script_name, current_catalog_name, strerror(errno));
 }
 
 int main(int argc, char *argv[]) {
+	setlocale(LC_TIME, "ru_RU.UTF-8");
+
 	char *start_catalog_name, *target_file_name;
 	script_name = argv[0];
 	start_catalog_name = argv[1];
