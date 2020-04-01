@@ -218,16 +218,16 @@ int main() {
 		setpgid(0, pid_arr[2]);
 	}
 	if (getpid() == pid_arr[3]) {
-		sleep(1);
 		signal(SIGUSR1, handler3);
 		signal(SIGTERM, handler3);
-		setpgid(0, pid_arr[2]);
+		while (setpgid(0, pid_arr[2]) == -1)
+			;
 	}
 	if (getpid() == pid_arr[4]) {
-		sleep(1);
 		signal(SIGUSR1, handler4);
 		signal(SIGTERM, handler4);
-		setpgid(0, pid_arr[2]);
+		while (setpgid(0, pid_arr[2]) == -1)
+			;
 	}
 	if (getpid() == pid_arr[5]) {
 		signal(SIGUSR2, handler5);		
@@ -235,10 +235,10 @@ int main() {
 		setpgid(0, pid_arr[5]);
 	}
 	if (getpid() == pid_arr[6]) {
-		sleep(1);
 		signal(SIGUSR2, handler6);
 		signal(SIGTERM, handler6);
-		setpgid(0, pid_arr[5]);
+		while (setpgid(0, pid_arr[5]) == -1)
+			;
 	}
 	if (getpid() == pid_arr[7]) {
 		signal(SIGUSR1, handler7);
