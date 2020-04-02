@@ -23,7 +23,9 @@ void handler1(int nsig) {
 		print_time();
 		if (++received_signals == 101) {
 			kill(-1 * pid_arr[2], SIGTERM);
-			wait(NULL);	
+			waitpid(pid_arr[2], NULL, 0);	
+			waitpid(pid_arr[3], NULL, 0);
+			waitpid(pid_arr[4], NULL, 0);
 			printf("1 %d %d завершил работу после %d USR1, %d USR2\n", getpid(), getppid(), send_usr1, send_usr2);
 			exit(0);
 		}	
@@ -47,7 +49,8 @@ void handler2(int nsig) {
 	}
 	else if (nsig == SIGTERM) {
 		kill(-1 * pid_arr[5], SIGTERM);
-		wait(NULL);
+		waitpid(pid_arr[5], NULL, 0);
+		waitpid(pid_arr[5], NULL, 0);
 		printf("2 %d %d завершил работу после %d USR1, %d USR2\n", getpid(), getppid(), send_usr1, send_usr2);
 		exit(0);
 	}
@@ -105,7 +108,7 @@ void handler6(int nsig) {
 	}
 	else if (nsig == SIGTERM) {
 		kill(pid_arr[7], SIGTERM);
-		wait(NULL);
+		waitpid(pid_arr[7], NULL, 0);
 		printf("6 %d %d завершил работу после %d USR1, %d USR2\n", getpid(), getppid(), send_usr1, send_usr2);
 		exit(0);
 	}
@@ -124,7 +127,7 @@ void handler7(int nsig) {
 	}
 	else if (nsig == SIGTERM) {
 		kill(pid_arr[8], SIGTERM);
-		wait(NULL);
+		waitpid(pid_arr[8], NULL, 0);
 		printf("7 %d %d завершил работу после %d USR1, %d USR2\n", getpid(), getppid(), send_usr1, send_usr2);
 		exit(0);
 	}
