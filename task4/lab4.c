@@ -14,6 +14,18 @@ void print_time() {
 	printf(" %ld\n", tv.tv_usec);
 }
 
+void handler0(int nsig) {
+	static int processes_ready = 0;
+	if (nsig == SIGUSR1) {
+		processes_ready++;
+		if (processes_ready >= 8) {
+			kill(pid_arr[1], SIGUSR2);
+			wait(NULL);
+			exit(0);	
+		}
+	}
+}
+
 void handler1(int nsig) {
 	static int received_signals = 0;
 	static int send_usr1 = 0;
@@ -210,60 +222,62 @@ int main() {
 		else if (pid > 0)
 			pid_arr[8] = pid;
 	}
-
+	
+	if (getpid() == pid_arr[0]) {
+		signal(SIGUSR1, handler0);
+	}
 	if (getpid() == pid_arr[1]) {
 		signal(SIGUSR2, handler1);
 		setpgid(pid_arr[1], 0);
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[2]) {
 		signal(SIGUSR1, handler2);
 		signal(SIGTERM, handler2);
 		setpgid(0, pid_arr[2]);
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[3]) {
 		signal(SIGUSR1, handler3);
 		signal(SIGTERM, handler3);
 		while (setpgid(0, pid_arr[2]) == -1)
 			;
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[4]) {
 		signal(SIGUSR1, handler4);
 		signal(SIGTERM, handler4);
 		while (setpgid(0, pid_arr[2]) == -1)
 			;
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[5]) {
 		signal(SIGUSR2, handler5);		
 		signal(SIGTERM, handler5);
 		setpgid(0, pid_arr[5]);
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[6]) {
 		signal(SIGUSR2, handler6);
 		signal(SIGTERM, handler6);
 		while (setpgid(0, pid_arr[5]) == -1)
 			;
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[7]) {
 		signal(SIGUSR1, handler7);
 		signal(SIGTERM, handler7);
 		setpgid(pid_arr[7], 0);
+		kill(pid_arr[0], SIGUSR1);
 	}
 	if (getpid() == pid_arr[8]) {
 		signal(SIGUSR1, handler8);
 		signal(SIGTERM, handler8);
 		setpgid(pid_arr[8], 0);
+		kill(pid_arr[0], SIGUSR1);
 	}
 
-	sleep(1);
-	if (getpid() == pid_arr[0])
-		kill(pid_arr[1], SIGUSR2);
-
-	if (getpid() == pid_arr[0])
-		wait(NULL);
-	else
-		while (1)
-			;
-	exit(0);
+	for (;;) { }
 	
 	return 0;
 }
